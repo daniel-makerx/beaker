@@ -11,5 +11,3 @@ jobs:
     name: Build and Test Python
     needs: check
     uses: ./.github/workflows/build-python.yaml
-    with:
-      coverageComment: true
