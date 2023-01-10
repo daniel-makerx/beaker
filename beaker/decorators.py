@@ -50,6 +50,14 @@ class DefaultArgumentClass(str, Enum):
     Constant = "constant"
 
 
+def remove_me(x: int) -> None:
+    # a new function with no coverage
+    if x < 5:
+        print("<5")
+    else:
+        print(">=5")
+
+
 class DefaultArgument:
     """
     DefaultArgument is a container for any arguments that may
