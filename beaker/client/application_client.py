@@ -100,7 +100,6 @@ class ApplicationClient:
         self,
         sender: str | None = None,
         signer: TransactionSigner | None = None,
-        args: list[Any] | None = None,
         suggested_params: transaction.SuggestedParams | None = None,
         on_complete: transaction.OnComplete = transaction.OnComplete.NoOpOC,
         extra_pages: int | None = None,
@@ -130,7 +129,6 @@ class ApplicationClient:
                 global_schema=self.app.global_state_schema,
                 local_schema=self.app.local_state_schema,
                 extra_pages=extra_pages,
-                app_args=args,
                 **kwargs,
             )
         else:
@@ -145,7 +143,6 @@ class ApplicationClient:
                         global_schema=self.app.global_state_schema,
                         local_schema=self.app.local_state_schema,
                         extra_pages=extra_pages,
-                        app_args=args,
                         **kwargs,
                     ),
                     signer=signer,
@@ -169,11 +166,9 @@ class ApplicationClient:
         self,
         sender: str | None = None,
         signer: TransactionSigner | None = None,
-        args: list[Any] | None = None,
         suggested_params: transaction.SuggestedParams | None = None,
         **kwargs: Any,
     ) -> str:
-
         """Submits a signed ApplicationCallTransaction with OnComplete set to UpdateApplication and source from the Application passed"""
 
         sp = self.get_suggested_params(suggested_params)
@@ -188,10 +183,8 @@ class ApplicationClient:
                 on_complete=transaction.OnComplete.UpdateApplicationOC,
                 sender=sender,
                 suggested_params=sp,
-                index=self.app_id,
                 approval_program=self.approval.raw_binary,
                 clear_program=self.clear.raw_binary,
-                app_args=args,
                 **kwargs,
             )
         else:
@@ -203,7 +196,6 @@ class ApplicationClient:
                         index=self.app_id,
                         approval_program=self.approval.raw_binary,
                         clear_program=self.clear.raw_binary,
-                        app_args=args,
                         **kwargs,
                     ),
                     signer=signer,
@@ -218,7 +210,6 @@ class ApplicationClient:
         self,
         sender: str | None = None,
         signer: TransactionSigner | None = None,
-        args: list[Any] | None = None,
         suggested_params: transaction.SuggestedParams | None = None,
         **kwargs: Any,
     ) -> str:
@@ -236,8 +227,6 @@ class ApplicationClient:
                 on_complete=transaction.OnComplete.OptInOC,
                 sender=sender,
                 suggested_params=sp,
-                index=self.app_id,
-                app_args=args,
                 signer=signer,
                 **kwargs,
             )
@@ -248,7 +237,6 @@ class ApplicationClient:
                         sender=sender,
                         sp=sp,
                         index=self.app_id,
-                        app_args=args,
                         **kwargs,
                     ),
                     signer=signer,
@@ -263,7 +251,6 @@ class ApplicationClient:
         self,
         sender: str | None = None,
         signer: TransactionSigner | None = None,
-        args: list[Any] | None = None,
         suggested_params: transaction.SuggestedParams | None = None,
         **kwargs: Any,
     ) -> str:
@@ -281,8 +268,6 @@ class ApplicationClient:
                 on_complete=transaction.OnComplete.CloseOutOC,
                 sender=sender,
                 suggested_params=sp,
-                index=self.app_id,
-                app_args=args,
                 signer=signer,
                 **kwargs,
             )
@@ -293,7 +278,6 @@ class ApplicationClient:
                         sender=sender,
                         sp=sp,
                         index=self.app_id,
-                        app_args=args,
                         **kwargs,
                     ),
                     signer=signer,
@@ -308,11 +292,9 @@ class ApplicationClient:
         self,
         sender: str | None = None,
         signer: TransactionSigner | None = None,
-        args: list[Any] | None = None,
         suggested_params: transaction.SuggestedParams | None = None,
         **kwargs: Any,
     ) -> str:
-
         """Submits a signed ApplicationCallTransaction with OnComplete set to ClearState"""
 
         sp = self.get_suggested_params(suggested_params)
@@ -326,7 +308,6 @@ class ApplicationClient:
                     sender=sender,
                     sp=sp,
                     index=self.app_id,
-                    app_args=args,
                     **kwargs,
                 ),
                 signer=signer,
@@ -341,7 +322,6 @@ class ApplicationClient:
         self,
         sender: str | None = None,
         signer: TransactionSigner | None = None,
-        args: list[Any] | None = None,
         suggested_params: transaction.SuggestedParams | None = None,
         **kwargs: Any,
     ) -> str:
@@ -359,8 +339,6 @@ class ApplicationClient:
                 on_complete=transaction.OnComplete.DeleteApplicationOC,
                 sender=sender,
                 suggested_params=sp,
-                index=self.app_id,
-                app_args=args,
                 signer=signer,
                 **kwargs,
             )
@@ -371,7 +349,6 @@ class ApplicationClient:
                         sender=sender,
                         sp=sp,
                         index=self.app_id,
-                        app_args=args,
                         **kwargs,
                     ),
                     signer=signer,
