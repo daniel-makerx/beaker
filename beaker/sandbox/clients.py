@@ -7,6 +7,8 @@ DEFAULT_ALGOD_TOKEN = "a" * 64
 DEFAULT_INDEXER_ADDRESS = "http://localhost:8980"
 DEFAULT_INDEXER_TOKEN = "a" * 64
 
+__all__ = ["get_algod_client", "get_indexer_client"]
+
 
 def get_algod_client(
     address: str = DEFAULT_ALGOD_ADDRESS, token: str = DEFAULT_ALGOD_TOKEN

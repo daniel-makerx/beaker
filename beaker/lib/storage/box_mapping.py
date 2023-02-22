@@ -12,6 +12,8 @@ from pyteal import (
     Concat,
 )
 
+__all__ = ["BoxMapping"]
+
 
 class BoxMapping:
     """Mapping provides an abstraction to store some typed data in a box keyed with a typed key"""

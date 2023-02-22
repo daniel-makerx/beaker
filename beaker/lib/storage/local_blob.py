@@ -22,6 +22,8 @@ from pyteal import (
 from beaker.consts import MAX_LOCAL_STATE
 from beaker.lib.storage.blob import BLOB_PAGE_SIZE, EMPTY_PAGE, Blob
 
+__all__ = ["LocalBlob"]
+
 
 class LocalBlob(Blob):
     """

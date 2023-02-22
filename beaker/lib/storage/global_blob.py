@@ -22,6 +22,8 @@ from beaker.consts import MAX_GLOBAL_STATE
 from beaker.lib.inline import InlineAssembly
 from beaker.lib.storage.blob import BLOB_PAGE_SIZE, EMPTY_PAGE, Blob
 
+__all__ = ["GlobalBlob"]
+
 
 class GlobalBlob(Blob):
     def __init__(self, *, keys: int | list[int] = MAX_GLOBAL_STATE):

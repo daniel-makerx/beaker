@@ -34,6 +34,8 @@ from beaker.client.state_decode import decode_state
 from beaker.compilation import Program
 from beaker.consts import num_extra_program_pages
 
+__all__ = ["ApplicationClient"]
+
 
 class ApplicationClient:
     def __init__(

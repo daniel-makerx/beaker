@@ -13,6 +13,8 @@ from pyteal import (
     CompileOptions,
 )
 
+__all__ = ["BoxList"]
+
 
 class BoxList:
     """List stores a list of static types in a box, named as the class attribute unless an overriding name is provided"""

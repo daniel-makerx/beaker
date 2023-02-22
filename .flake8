@@ -16,7 +16,7 @@ exclude =
     .venv
 
 per-file-ignores =
-    */__init__.py:          F401 I252
+    */__init__.py:          F401 I252 I250 F403
 
 # from flake8-tidy-imports
 ban-relative-imports = true
