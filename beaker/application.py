@@ -16,6 +16,11 @@ from typing import (
     overload,
 )
 
+from algokit_utils.application_specification import (
+    ApplicationSpecification,
+    DefaultArgumentDict,
+    MethodHints,
+)
 from pyteal import (
     ABIReturnSubroutine,
     Approve,
@@ -32,11 +37,6 @@ from pyteal import (
     Txn,
 )
 
-from beaker.application_specification import (
-    ApplicationSpecification,
-    DefaultArgumentDict,
-    MethodHints,
-)
 from beaker.build_options import BuildOptions
 from beaker.decorators import authorize as authorize_decorator
 from beaker.logic_signature import LogicSignature, LogicSignatureTemplate

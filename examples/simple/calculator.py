@@ -43,8 +43,12 @@ def demo() -> None:
     )
 
     # Create the application on chain, implicitly sets the app id for the app client
-    app_id, app_addr, txid = app_client.create()
-    print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
+    create_result = app_client.create()
+    print(
+        f"Created App with id: {create_result.app_id} "
+        f"and address addr: {create_result.app_address} "
+        f"in tx: {create_result.transaction_id}"
+    )
 
     result = app_client.call(add, a=2, b=2)
     print(f"add result: {result.return_value}")

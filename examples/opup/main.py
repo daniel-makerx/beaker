@@ -26,11 +26,17 @@ def demo() -> None:
     )
 
     # Create the applicatiion on chain, set the app id for the app client
-    app_id, app_addr, txid = app_client.create()
-    print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
+    create_result = app_client.create()
+    print(
+        f"Created App with id: {create_result.app_id} and "
+        f"address addr: {create_result.app_address} in "
+        f"tx: {create_result.transaction_id}"
+    )
 
     txn = TransactionWithSigner(
-        txn=transaction.PaymentTxn(acct.address, sp, app_addr, int(1e6)),
+        txn=transaction.PaymentTxn(
+            acct.address, sp, create_result.app_address, int(1e6)
+        ),
         signer=acct.signer,
     )
     result = app_client.call("opup_bootstrap", ptxn=txn)

@@ -1,4 +1,6 @@
-from beaker.client import ApplicationClient, LogicException
+from algokit_utils.logic_error import LogicException
+
+from beaker.client import ApplicationClient
 from beaker.sandbox import get_accounts, get_algod_client
 from examples.state.contract import (
     app,
@@ -26,7 +28,11 @@ def demo() -> None:
     client = get_algod_client()
 
     app_client = ApplicationClient(client, app, signer=acct.signer)
-    app_id, app_address, transaction_id = app_client.create()
+    create_result = app_client.create()
+    app_id = create_result.app_id
+    app_address = create_result.app_address
+    transaction_id = create_result.transaction_id
+
     print(
         f"DEPLOYED: App ID: {app_id} Address: {app_address} "
         + f"Transaction ID: {transaction_id}"

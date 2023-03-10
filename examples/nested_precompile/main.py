@@ -20,7 +20,8 @@ def demo() -> None:
     app_client_grandparent = client.ApplicationClient(
         sandbox.get_algod_client(), grand_parent_app, signer=acct.signer
     )
-    grandparent_app_id, _, _ = app_client_grandparent.create()
+    grandparent_create_result = app_client_grandparent.create()
+    grandparent_app_id = grandparent_create_result.app_id
     print(f"Created grandparent app: {grandparent_app_id}")
     app_client_grandparent.fund(1 * consts.algo)
 

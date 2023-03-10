@@ -1,5 +1,6 @@
 import pyteal as pt
 import pytest
+from algokit_utils.logic_error import LogicException
 
 import beaker as bkr
 from beaker.lib.storage.blob import blob_page_size
@@ -75,7 +76,7 @@ def test_global_blob_write_read_past_end() -> None:
 
     expected = list(bytes(8))
 
-    with pytest.raises(bkr.client.LogicException):
+    with pytest.raises(LogicException):
         assert_output(app, [], [expected], opups=1)
 
 
@@ -111,7 +112,7 @@ def test_global_blob_set_past_end() -> None:
 
     expected = [num]
 
-    with pytest.raises(bkr.client.LogicException):
+    with pytest.raises(LogicException):
         assert_output(app, [], expected, opups=1)
 
 

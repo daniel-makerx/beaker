@@ -27,11 +27,12 @@ def demo() -> None:
     )
 
     # Deploy the app on-chain
-    app_id, app_addr, txid = app_client.create()
+    crate_result = app_client.create()
+
     print(
-        f"""Deployed app in txid {txid}
-        App ID: {app_id} 
-        Address: {app_addr} 
+        f"""Deployed app in txid {crate_result.transaction_id}
+        App ID: {crate_result.app_id} 
+        Address: {crate_result.app_address} 
     """
     )
 

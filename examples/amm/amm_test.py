@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 import pyteal
 import pytest
+from algokit_utils.logic_error import LogicException
 from algosdk import transaction
 from algosdk.atomic_transaction_composer import (
     AccountTransactionSigner,
@@ -16,9 +17,8 @@ from algosdk.encoding import decode_address
 from algosdk.source_map import SourceMap
 from algosdk.v2client.algod import AlgodClient
 
-from beaker import client, consts, sandbox
-from beaker.client.application_client import ApplicationClient
-from beaker.client.logic_error import LogicException
+from beaker import consts, sandbox
+from beaker.client import ApplicationClient
 from examples.amm.amm import (
     ConstantProductAMMErrors,
     amm_app,
@@ -41,7 +41,7 @@ AssertTestCase = tuple[
     str,
     abi.Method | pyteal.ABIReturnSubroutine | str,
     dict[str, typing.Any],
-    client.ApplicationClient,
+    ApplicationClient,
 ]
 
 
@@ -109,14 +109,14 @@ def assets(creator_acct: AcctInfo, user_acct: AcctInfo) -> tuple[int, int]:
 
 
 @pytest.fixture(scope="session")
-def creator_app_client(creator_acct: AcctInfo) -> client.ApplicationClient:
+def creator_app_client(creator_acct: AcctInfo) -> ApplicationClient:
     _, _, signer = creator_acct
-    app_client = client.ApplicationClient(algod_client, amm_app, signer=signer)
+    app_client = ApplicationClient(algod_client, amm_app, signer=signer)
     return app_client
 
 
 def get_app_client_details(
-    app_client: client.ApplicationClient,
+    app_client: ApplicationClient,
 ) -> tuple[str, str, AccountTransactionSigner]:
     app_addr, addr, signer = (
         app_client.app_addr,
@@ -130,7 +130,7 @@ def get_app_client_details(
     return app_addr, addr, signer
 
 
-def test_app_create(creator_app_client: client.ApplicationClient) -> None:
+def test_app_create(creator_app_client: ApplicationClient) -> None:
     creator_app_client.create()
     global_state = creator_app_client.get_global_state()
     sender = creator_app_client.get_sender()
@@ -156,7 +156,7 @@ def minimum_fee_for_txn_count(
     return s
 
 
-def assert_app_algo_balance(c: client.ApplicationClient, expected_algos: int) -> None:
+def assert_app_algo_balance(c: ApplicationClient, expected_algos: int) -> None:
     """
     Verifies the app's algo balance is not unexpectedly drained during
     app interaction (e.g. paying inner transaction fees).
@@ -187,7 +187,7 @@ def build_set_governor_transaction(new_governor: str) -> dict[str, typing.Any]:
 
 
 def build_boostrap_transaction(
-    app_client: client.ApplicationClient, assets: tuple[int, int]
+    app_client: ApplicationClient, assets: tuple[int, int]
 ) -> dict[str, typing.Any]:
 
     app_addr, addr, signer = get_app_client_details(app_client)
@@ -212,7 +212,7 @@ def build_boostrap_transaction(
 
 
 def build_mint_transaction(
-    app_client: client.ApplicationClient,
+    app_client: ApplicationClient,
     assets: tuple[int, int],
     pool_asset: int,
     a_amount: int,
@@ -290,7 +290,7 @@ def build_swap_transaction(
 
 
 def test_app_set_governor(
-    creator_app_client: client.ApplicationClient, user_acct: AcctInfo
+    creator_app_client: ApplicationClient, user_acct: AcctInfo
 ) -> None:
     _, creator_addr, _ = get_app_client_details(creator_app_client)
 
@@ -324,7 +324,7 @@ def test_app_set_governor(
 
 
 def test_app_bootstrap(
-    creator_app_client: client.ApplicationClient, assets: tuple[int, int]
+    creator_app_client: ApplicationClient, assets: tuple[int, int]
 ) -> None:
 
     app_addr = creator_app_client.app_addr
@@ -529,7 +529,7 @@ all_assert_groups = ["governor", "bootstrap", "mint", "burn", "swap"]
 )
 def grouped_assert_cases(
     request: pytest.FixtureRequest,
-    creator_app_client: client.ApplicationClient,
+    creator_app_client: ApplicationClient,
     user_acct: AcctInfo,
 ) -> list[AssertTestCase]:
     group: str = request.param
@@ -538,7 +538,7 @@ def grouped_assert_cases(
 
 @pytest.fixture(scope="session")
 def all_assert_cases(
-    creator_app_client: client.ApplicationClient, user_acct: AcctInfo
+    creator_app_client: ApplicationClient, user_acct: AcctInfo
 ) -> list[AssertTestCase]:
     return _assert_cases("all", creator_app_client, user_acct)
 
@@ -548,13 +548,13 @@ XS: typing.TypeAlias = list[tuple[str, dict[str, typing.Any]]]
 
 def _assert_cases(
     group_key: str,
-    creator_app_client: client.ApplicationClient,
+    creator_app_client: ApplicationClient,
     user_acct: AcctInfo,
 ) -> list[AssertTestCase]:
     def cases(
         m: abi.Method | pyteal.ABIReturnSubroutine | str,
         xs: XS,
-        client: client.ApplicationClient = creator_app_client,
+        client: ApplicationClient = creator_app_client,
     ) -> list[AssertTestCase]:
         return [(a, m, txn, client) for a, txn in xs]
 
@@ -617,7 +617,7 @@ def _assert_cases(
 
     def bootstrap_cases() -> list[AssertTestCase]:
         def bootstrap(
-            app_client: client.ApplicationClient = creator_app_client,
+            app_client: ApplicationClient = creator_app_client,
             assets: tuple[int, int] = assets,
         ) -> dict[str, typing.Any]:
             return build_boostrap_transaction(app_client, assets)
@@ -646,7 +646,7 @@ def _assert_cases(
         b_amt = a_amt // 10
 
         def mint(
-            app_client: client.ApplicationClient = creator_app_client,
+            app_client: ApplicationClient = creator_app_client,
             assets: tuple[int, int] = assets,
             pool_asset: int = pool_asset,
             a_amount: int = a_amt,
@@ -713,7 +713,7 @@ def _assert_cases(
 
     def burn_cases() -> list[AssertTestCase]:
         def burn(
-            app_client: client.ApplicationClient = creator_app_client,
+            app_client: ApplicationClient = creator_app_client,
             assets: tuple[int, int] = assets,
             pool_asset: int = pool_asset,
             burn_amt: int = 1,
@@ -758,7 +758,7 @@ def _assert_cases(
 
     def swap_cases() -> list[AssertTestCase]:
         def swap(
-            app_client: client.ApplicationClient = creator_app_client,
+            app_client: ApplicationClient = creator_app_client,
             assets: tuple[int, int] = assets,
             swap_amt: int = 1,
             swap_asset: int = a_asset,
@@ -858,7 +858,7 @@ def test_approval_asserts(grouped_assert_cases: list[AssertTestCase]) -> None:
 
 
 def test_approval_assert_coverage(
-    all_assert_cases: list[AssertTestCase], creator_app_client: client.ApplicationClient
+    all_assert_cases: list[AssertTestCase], creator_app_client: ApplicationClient
 ) -> None:
     """
     Confirms `test_approval_asserts` exercises all app approval asserts.

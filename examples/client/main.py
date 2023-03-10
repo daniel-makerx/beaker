@@ -1,3 +1,4 @@
+from algokit_utils.logic_error import LogicException
 from pyteal import ABIReturnSubroutine, Approve, Expr, Global, TealType, abi
 
 from beaker import (
@@ -12,7 +13,6 @@ from beaker import (
     unconditional_opt_in_approval,
 )
 from beaker.client.application_client import ApplicationClient
-from beaker.client.logic_error import LogicException
 
 
 class ClientExampleState:

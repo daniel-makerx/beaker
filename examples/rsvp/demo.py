@@ -22,7 +22,10 @@ def demo() -> None:
     print("### CREATE AND INITIALIZE CONTRACT ### \n")
     sp = client.suggested_params()
     # Create the applicatiion on chain, set the app id for the app client
-    app_id, app_addr, txid = app_client.create(event_price=1 * consts.algo)
+    create_result = app_client.create(event_price=1 * consts.algo)
+    app_id = create_result.app_id
+    app_addr = create_result.app_address
+    txid = create_result.transaction_id
     print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
 
     event_price = app_client.call(read_price)

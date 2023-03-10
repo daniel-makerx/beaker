@@ -23,7 +23,10 @@ app_client = ApplicationClient(client, amm_app, signer=acct.signer)
 def demo() -> None:
 
     # Create the applicatiion on chain, set the app id for the app client
-    app_id, app_addr, txid = app_client.create()
+    create_result = app_client.create()
+    app_id = create_result.app_id
+    app_addr = create_result.app_address
+    txid = create_result.transaction_id
     print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
 
     # Fund App address so it can create the pool token and hold balances
