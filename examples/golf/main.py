@@ -198,7 +198,7 @@ def demo() -> None:
     # Create && fund app acct
     app_client.create()
     app_client.fund(100 * consts.algo)
-    print(f"AppID: {app_client.app_id}  AppAddr: {app_client.app_addr}")
+    print(f"AppID: {app_client.app_id}  AppAddr: {app_client.app_address}")
 
     # Create 4 box refs since we need to touch 4k
     boxes = [(app_client.app_id, _box_name)] * 4

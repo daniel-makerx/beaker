@@ -119,7 +119,7 @@ def get_app_client_details(
     app_client: ApplicationClient,
 ) -> tuple[str, str, AccountTransactionSigner]:
     app_addr, addr, signer = (
-        app_client.app_addr,
+        app_client.app_address,
         app_client.sender,
         app_client.signer,
     )
@@ -327,7 +327,7 @@ def test_app_bootstrap(
     creator_app_client: ApplicationClient, assets: tuple[int, int]
 ) -> None:
 
-    app_addr = creator_app_client.app_addr
+    app_addr = creator_app_client.app_address
     asset_a, asset_b = assets
 
     # Bootstrap to create pool token and set global state

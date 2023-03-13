@@ -60,7 +60,7 @@ def demo() -> None:
     ptxn = PaymentTxn(
         acct.address,
         sp,
-        app_client.app_addr,
+        app_client.app_address,
         membership_club_app.state.minimum_balance.value,
     )
     result = app_client.call(
@@ -152,8 +152,8 @@ def demo() -> None:
     app_member_client = client.ApplicationClient(
         sandbox.get_algod_client(), app_member_app, signer=app_client.signer
     )
-    app_member_create_result = app_member_client.create()
-    app_member_addr = app_member_create_result.app_address
+    app_member_client.create()
+    app_member_addr = app_member_client.app_address
 
     # Fund the app member and make it opt into the membership token
     print("Bootstrapping app member")

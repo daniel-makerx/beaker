@@ -154,7 +154,7 @@ pyteal = "^0.23.0"
 type = "git"
 url = "https://github.com/algorandfoundation/algokit-utils-py"
 reference = "add-application-client"
-resolved_reference = "0f6390277de3575e5e8765c7e19ea6364f2d60b8"
+resolved_reference = "47559bec383902e70526efec73cdaf154479e630"
 
 [[package]]
 name = "async-timeout"

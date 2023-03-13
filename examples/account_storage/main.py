@@ -197,7 +197,7 @@ def create_and_opt_in_account(
         add_account,
         suggested_params=sp,
         nonce=nonce.encode(),
-        rekey_to=lsig_client.app_addr,
+        rekey_to=lsig_client.app_address,
         on_complete=txns.OnComplete.OptInOC,
     )
 

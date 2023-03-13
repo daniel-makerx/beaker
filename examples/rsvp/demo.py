@@ -23,9 +23,9 @@ def demo() -> None:
     sp = client.suggested_params()
     # Create the applicatiion on chain, set the app id for the app client
     create_result = app_client.create(event_price=1 * consts.algo)
-    app_id = create_result.app_id
-    app_addr = create_result.app_address
-    txid = create_result.transaction_id
+    app_id = app_client.app_id
+    app_addr = app_client.app_address
+    txid = create_result.tx_ids[0]
     print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
 
     event_price = app_client.call(read_price)

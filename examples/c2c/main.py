@@ -199,9 +199,9 @@ def demo() -> None:
     app_client = bkr.client.ApplicationClient(
         algod_client, main_app, signer=acct.signer
     )
-    create_result = app_client.create()
+    app_client.create()
 
-    print(f"Created main app: {create_result.app_id}")
+    print(f"Created main app: {app_client.app_id}")
     app_client.fund(1 * bkr.consts.algo)
 
     # Call the main app to create the sub app

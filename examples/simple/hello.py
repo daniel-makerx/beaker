@@ -30,9 +30,9 @@ def demo() -> None:
     crate_result = app_client.create()
 
     print(
-        f"""Deployed app in txid {crate_result.transaction_id}
-        App ID: {crate_result.app_id} 
-        Address: {crate_result.app_address} 
+        f"""Deployed app in txid {crate_result.tx_ids[0]}
+        App ID: {app_client.app_id} 
+        Address: {app_client.app_address} 
     """
     )
 

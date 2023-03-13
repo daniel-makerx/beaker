@@ -29,9 +29,9 @@ def demo() -> None:
 
     app_client = ApplicationClient(client, app, signer=acct.signer)
     create_result = app_client.create()
-    app_id = create_result.app_id
-    app_address = create_result.app_address
-    transaction_id = create_result.transaction_id
+    app_id = app_client.app_id
+    app_address = app_client.app_address
+    transaction_id = create_result.tx_ids[0]
 
     print(
         f"DEPLOYED: App ID: {app_id} Address: {app_address} "

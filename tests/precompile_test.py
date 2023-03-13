@@ -453,8 +453,8 @@ def test_precompile_get_create_config_single_page() -> None:
     client = ApplicationClient(
         client=get_algod_client(), app=deployer_app, signer=acct.signer
     )
-    create_result = client.create()
-    app_id = create_result.app_id
+    client.create()
+    app_id = client.app_id
     assert app_id > 0
     client.fund(1 * consts.algo)
     result = client.call(deploy)
@@ -510,7 +510,7 @@ def test_deploy_inner_app_state() -> None:
         app_id=result.return_value,
         signer=acct.signer,
     )
-    assert inner_client.get_local_state(account=client.app_addr) == {
+    assert inner_client.get_local_state(account=client.app_address) == {
         "local_bytes": "goodbye",
         "local_uint": 123,
     }
