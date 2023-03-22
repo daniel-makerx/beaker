@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 from algosdk import transaction
 from algosdk.atomic_transaction_composer import (
     AtomicTransactionComposer,
@@ -24,7 +26,11 @@ def main() -> None:
     app_client = ApplicationClient(client, amm.app, signer=signer)
 
     # Create the applicatiion on chain, set the app id for the app client
-    app_id, app_addr, txid = app_client.create()
+    create_result = app_client.create()
+    app_id = app_client.app_id
+    app_addr = app_client.app_address
+    assert app_addr
+    txid = create_result.tx_id
     print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
 
     # Fund App address so it can create the pool token and hold balances
@@ -52,7 +58,7 @@ def main() -> None:
     pool_token = result.return_value
 
     def print_balances() -> None:
-        addrbal = client.account_info(addr)
+        addrbal = cast(dict[str, Any], client.account_info(addr))
         print("Participant: ")
         for asset in addrbal["assets"]:
             if asset["asset-id"] == pool_token:
@@ -62,7 +68,7 @@ def main() -> None:
             if asset["asset-id"] == asset_b:
                 print("\tAssetB Balance {}".format(asset["amount"]))
 
-        appbal = client.account_info(app_addr)
+        appbal = cast(dict[str, Any], client.account_info(app_addr))
         print("App: ")
         for asset in appbal["assets"]:
             if asset["asset-id"] == pool_token:

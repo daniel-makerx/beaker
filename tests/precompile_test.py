@@ -452,9 +452,10 @@ def test_precompile_get_create_config_single_page() -> None:
 
     acct, *_ = get_accounts()
     client = ApplicationClient(
-        client=get_algod_client(), app=deployer_app, signer=acct.signer
+        algod_client=get_algod_client(), app=deployer_app, signer=acct.signer
     )
-    app_id, *_ = client.create()
+    client.create()
+    app_id = client.app_id
     assert app_id > 0
     client.fund(1 * consts.algo)
     result = client.call(deploy)
@@ -499,13 +500,13 @@ def test_deploy_inner_app_state() -> None:
 
     acct, *_ = get_accounts()
     client = ApplicationClient(
-        client=get_algod_client(), app=deployer, signer=acct.signer
+        algod_client=get_algod_client(), app=deployer, signer=acct.signer
     )
     client.create()
     client.fund(1 * consts.algo)
     result = client.call(deploy)
     inner_client = ApplicationClient(
-        client=get_algod_client(),
+        algod_client=get_algod_client(),
         app=inner_app,
         app_id=result.return_value,
         signer=acct.signer,

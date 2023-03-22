@@ -59,11 +59,10 @@ def main() -> None:
         + "3c880358579d811b21dd1b7fd9bb01c1d81d10e69f0384e675c32b39643be8921b"
     )
     signature = bytes.fromhex(hex_signature)
-    atc = lsig_client.add_method_call(
+    lsig_client.compose_call(
         atc,
-        eth_checker.check_eth_sig,
-        hash=hash,
-        signature=signature,
+        eth_checker.check_eth_sig.method_spec(),
+        args={"hash": hash, "signature": signature},
         suggested_params=sp_no_fee,
     )
 
@@ -73,11 +72,10 @@ def main() -> None:
         + "48e6fa0c18abc62e42820f05943e47af3e9fbe306ce74d64094bdf1691ee53e01c"
     )
     signature = bytes.fromhex(hex_signature)
-    atc = lsig_client.add_method_call(
+    lsig_client.compose_call(
         atc,
-        eth_checker.check_eth_sig,
-        hash=hash,
-        signature=signature,
+        eth_checker.check_eth_sig.method_spec(),
+        args={"hash": hash, "signature": signature},
         suggested_params=sp_no_fee,
     )
 

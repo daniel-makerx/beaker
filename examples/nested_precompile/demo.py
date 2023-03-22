@@ -14,14 +14,17 @@ def main() -> None:
 
     # Create grandparent app and fund it
     app_client_grandparent = client.ApplicationClient(
-        sandbox.get_algod_client(), grandparent.app, signer=acct.signer
+        sandbox.get_algod_client(),
+        grandparent.app,
+        signer=acct.signer,
     )
-    grandparent_app_id, _, _ = app_client_grandparent.create()
+    app_client_grandparent.create()
+    grandparent_app_id = app_client_grandparent.app_id
     print(f"Created grandparent app: {grandparent_app_id}")
     app_client_grandparent.fund(1 * consts.algo)
 
     # Call the grandparent app to create the parent app
-    result = app_client_grandparent.call(grandparent.create_parent)
+    result = app_client_grandparent.call(grandparent.create_parent.method_spec())
     parent_app_id = result.return_value
     print(f"Created parent app: {parent_app_id}")
 
@@ -36,7 +39,7 @@ def main() -> None:
     app_client_parent.fund(1 * consts.algo)
 
     # Call the parent app to create the child_1 app
-    result = app_client_parent.call(parent.create_child_1)
+    result = app_client_parent.call(parent.create_child_1.method_spec())
     child_app_id = result.return_value
     print(f"Created child_1 app: {child_app_id}")
 
@@ -51,12 +54,12 @@ def main() -> None:
     app_client_child.fund(1 * consts.algo)
 
     # Call the child_1 app to increment counter
-    result = app_client_child.call(child1.increment_counter)
+    result = app_client_child.call(child1.increment_counter.method_spec())
     counter_value = result.return_value
     print(f"Counter value: {counter_value}")
 
     # Call the parent app to create the child_2 app
-    result = app_client_parent.call(parent.create_child_2)
+    result = app_client_parent.call(parent.create_child_2.method_spec())
     child_app_id = result.return_value
     print(f"Created child_2 app: {child_app_id}")
 
@@ -71,7 +74,7 @@ def main() -> None:
     app_client_child.fund(1 * consts.algo)
 
     # Call the child_2 app to check lsig addr
-    result = app_client_child.call(child2.get_lsig_addr)
+    result = app_client_child.call(child2.get_lsig_addr.method_spec())
     addr_value = result.return_value
     print(f"LSig address value: {addr_value}")
 

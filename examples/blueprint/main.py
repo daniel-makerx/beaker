@@ -73,7 +73,7 @@ extended_app.apply(calculator_blueprint)
 
 def demo() -> None:
     app_client = client.ApplicationClient(
-        client=sandbox.get_algod_client(),
+        algod_client=sandbox.get_algod_client(),
         app=extended_app,
         signer=sandbox.get_accounts().pop().signer,
     )

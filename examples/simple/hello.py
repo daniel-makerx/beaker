@@ -19,7 +19,7 @@ def demo() -> None:
     # Create an Application client
     app_client = client.ApplicationClient(
         # Get sandbox algod client
-        client=sandbox.get_algod_client(),
+        algod_client=sandbox.get_algod_client(),
         # Pass instance of app to client
         app=hello_app,
         # Get acct from sandbox and pass the signer
@@ -27,11 +27,12 @@ def demo() -> None:
     )
 
     # Deploy the app on-chain
-    app_id, app_addr, txid = app_client.create()
+    crate_result = app_client.create()
+
     print(
-        f"""Deployed app in txid {txid}
-        App ID: {app_id} 
-        Address: {app_addr} 
+        f"""Deployed app in txid {crate_result.tx_id}
+        App ID: {app_client.app_id} 
+        Address: {app_client.app_address} 
     """
     )
 

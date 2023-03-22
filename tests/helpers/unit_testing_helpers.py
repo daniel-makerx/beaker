@@ -149,9 +149,9 @@ def assert_output(
             if opups > 0:
                 atc = AtomicTransactionComposer()
 
-                app_client.add_method_call(atc, "unit_test", **input)
+                app_client.compose_call(atc, "unit_test", args=input)
                 for x in range(opups):
-                    app_client.add_method_call(atc, "opup", note=str(x).encode())
+                    app_client.compose_call(atc, "opup", note=str(x).encode())
 
                 results = app_client._execute_atc(atc, wait_rounds=2)
 

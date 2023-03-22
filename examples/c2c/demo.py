@@ -12,9 +12,9 @@ def main() -> None:
     app_client = beaker.client.ApplicationClient(
         algod_client, c2c_main.app, signer=acct.signer
     )
-    main_app_id, _, _ = app_client.create()
+    app_client.create()
 
-    print(f"Created main app: {main_app_id}")
+    print(f"Created main app: {app_client.app_id}")
     app_client.fund(1 * beaker.consts.algo)
 
     # Call the main app to create the sub app

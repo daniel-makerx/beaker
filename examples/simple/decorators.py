@@ -17,7 +17,7 @@ def demo() -> None:
         external_example_app,
         signer=sandbox.get_accounts().pop().signer,
     )
-    app_client.create(input="yo")
+    app_client.create(args={"input": "yo"})
     # print(result.return_value)
 
 

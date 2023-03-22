@@ -1,5 +1,6 @@
 import base64
 import random
+from typing import Any, cast
 
 from beaker import client, consts, sandbox
 
@@ -18,7 +19,10 @@ def decode_budget(tx_info: dict) -> int:
 
 
 def get_box(app_client: client.ApplicationClient, name: bytes) -> list[int]:
-    box_contents = app_client.client.application_box_by_name(app_client.app_id, name)
+    box_contents = cast(
+        dict[str, Any],
+        app_client.client.application_box_by_name(app_client.app_id, name),
+    )
 
     vals = []
     data = base64.b64decode(box_contents["value"])

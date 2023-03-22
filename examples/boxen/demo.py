@@ -149,7 +149,8 @@ def main() -> None:
     app_member_client = beaker.client.ApplicationClient(
         beaker.sandbox.get_algod_client(), app_member.app, signer=app_client.signer
     )
-    _, app_member_addr, _ = app_member_client.create()
+    app_member_client.create()
+    app_member_addr = app_member_client.app_address
 
     # Fund the app member and make it opt into the membership token
     print("Bootstrapping app member")

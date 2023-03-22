@@ -39,12 +39,16 @@ def demo() -> None:
 
     # Create an Application client containing both an algod client and app
     app_client = ApplicationClient(
-        client=algod_client, app=calculator_app, signer=acct.signer
+        algod_client=algod_client, app=calculator_app, signer=acct.signer
     )
 
     # Create the application on chain, implicitly sets the app id for the app client
-    app_id, app_addr, txid = app_client.create()
-    print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
+    create_result = app_client.create()
+    print(
+        f"Created App with id: {app_client.app_id} "
+        f"and address addr: {app_client.app_address} "
+        f"in tx: {create_result.tx_id}"
+    )
 
     result = app_client.call(add, a=2, b=2)
     print(f"add result: {result.return_value}")

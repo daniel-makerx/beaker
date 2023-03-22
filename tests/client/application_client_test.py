@@ -1,9 +1,10 @@
 from base64 import b64decode, b64encode
-from typing import Any
+from typing import Any, cast
 
 import algosdk.error
 import pyteal as pt
 import pytest
+from algokit_utils import LogicError
 from algosdk.account import generate_account
 from algosdk.atomic_transaction_composer import (
     AccountTransactionSigner,
@@ -22,9 +23,7 @@ from beaker import (
     GlobalStateValue,
     LocalStateValue,
 )
-from beaker.application import _default_argument_from_resolver
 from beaker.client.application_client import ApplicationClient
-from beaker.client.logic_error import LogicException
 from beaker.sandbox import get_accounts, get_algod_client
 
 
@@ -106,7 +105,6 @@ def test_app_client_create() -> None:
     assert ac.signer is None, "Should not have a signer"
     assert ac.sender is None, "Should not have a sender"
     assert ac.app_id == 0, "Should not have app id"
-    assert ac.app_addr is None, "Should not have app address"
     assert ac.suggested_params is None, "Should not have suggested params"
 
     with pytest.raises(Exception):
@@ -183,9 +181,7 @@ def test_app_prepare(sb_accts: SandboxAccounts) -> None:
     assert (
         ac_with_lsig.sender == lsig.address()
     ), "Should have the address of the lsig as the sender"
-    assert (
-        ac_with_lsig.get_signer(None) == lsig_signer
-    ), "Should produce the same signer"
+    assert ac_with_lsig.get_signer() == lsig_signer, "Should produce the same signer"
     assert (
         ac_with_lsig.get_sender(None, None) == lsig.address()
     ), "Should produce the same address"
@@ -213,13 +209,16 @@ def test_create(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, app, signer=signer)
-    app_id, app_addr, tx_id = ac.create()
+    create_result = ac.create()
+    app_id = ac.app_id
+    app_addr = ac.app_address
+    tx_id = create_result.tx_id
     assert app_id > 0
     assert app_addr == get_application_address(app_id)
     assert ac.app_id == app_id
     assert ac.app_addr == app_addr
 
-    result_tx = client.pending_transaction_info(tx_id)
+    result_tx = cast(dict[str, Any], client.pending_transaction_info(tx_id))
     assert result_tx["confirmed-round"] > 0
     expect_dict(
         result_tx,
@@ -242,15 +241,16 @@ def test_create(sb_accts: SandboxAccounts) -> None:
     sp = client.suggested_params()
     sp.fee = 1_000_000
     sp.flat_fee = True
-    app_id, app_addr, tx_id = new_ac.create(
-        extra_pages=extra_pages, suggested_params=sp
-    )
+    create_result = new_ac.create(extra_pages=extra_pages, suggested_params=sp)
+    app_id = new_ac.app_id
+    app_addr = new_ac.app_address
+    tx_id = create_result.tx_id
     assert app_id > 0
     assert app_addr == get_application_address(app_id)
     assert new_ac.app_id == app_id
     assert new_ac.app_addr == app_addr
 
-    result_tx = client.pending_transaction_info(tx_id)
+    result_tx = cast(dict[str, Any], client.pending_transaction_info(tx_id))
     expect_dict(
         result_tx,
         {
@@ -268,7 +268,7 @@ def test_create(sb_accts: SandboxAccounts) -> None:
         },
     )
 
-    with pytest.raises(LogicException):
+    with pytest.raises(LogicError):
         ac.create(note="failmeplz")
 
 
@@ -278,10 +278,12 @@ def test_update(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, app, signer=signer)
-    app_id, app_addr, _ = ac.create()
+    ac.create()
 
-    tx_id = ac.update()
-    result_tx = client.pending_transaction_info(tx_id)
+    update_result = ac.update()
+    result_tx = cast(
+        dict[str, Any], client.pending_transaction_info(update_result.tx_id)
+    )
     expect_dict(
         result_tx,
         {
@@ -289,14 +291,14 @@ def test_update(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apan": OnComplete.UpdateApplicationOC,
-                    "apid": app_id,
+                    "apid": ac.app_id,
                     "snd": addr,
                 }
             },
         },
     )
 
-    with pytest.raises(LogicException):
+    with pytest.raises(LogicError):
         addr, pk, signer2 = sb_accts[1]
         ac2 = ac.prepare(signer=signer2)
         ac2.update()
@@ -307,10 +309,12 @@ def test_delete(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, app, signer=signer)
-    app_id, _, _ = ac.create()
+    ac.create()
 
-    tx_id = ac.delete()
-    result_tx = client.pending_transaction_info(tx_id)
+    delete_result = ac.delete()
+    result_tx = cast(
+        dict[str, Any], client.pending_transaction_info(delete_result.tx_id)
+    )
     expect_dict(
         result_tx,
         {
@@ -318,16 +322,16 @@ def test_delete(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apan": OnComplete.DeleteApplicationOC,
-                    "apid": app_id,
+                    "apid": ac.app_id,
                     "snd": addr,
                 }
             },
         },
     )
 
-    with pytest.raises(LogicException):
+    with pytest.raises(LogicError):
         ac = ApplicationClient(client, app, signer=signer)
-        app_id, _, _ = ac.create()
+        ac.create()
 
         _, _, signer2 = sb_accts[1]
         ac2 = ac.prepare(signer=signer2)
@@ -340,12 +344,14 @@ def test_opt_in(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, app, signer=signer)
-    app_id, _, _ = ac.create()
+    ac.create()
 
     new_addr, new_pk, new_signer = sb_accts[1]
     new_ac = ac.prepare(signer=new_signer)
-    tx_id = new_ac.opt_in()
-    result_tx = client.pending_transaction_info(tx_id)
+    opt_in_result = new_ac.opt_in()
+    result_tx = cast(
+        dict[str, Any], client.pending_transaction_info(opt_in_result.tx_id)
+    )
     expect_dict(
         result_tx,
         {
@@ -353,14 +359,14 @@ def test_opt_in(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apan": OnComplete.OptInOC,
-                    "apid": app_id,
+                    "apid": new_ac.app_id,
                     "snd": new_addr,
                 }
             },
         },
     )
 
-    with pytest.raises(LogicException):
+    with pytest.raises(LogicError):
         _, _, newer_signer = sb_accts[2]
         newer_ac = ac.prepare(signer=newer_signer)
         newer_ac.opt_in(note="failmeplz")
@@ -372,14 +378,16 @@ def test_close_out(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, app, signer=signer)
-    app_id, _, _ = ac.create()
+    ac.create()
 
     new_addr, new_pk, new_signer = sb_accts[1]
     new_ac = ac.prepare(signer=new_signer)
     new_ac.opt_in()
 
-    tx_id = new_ac.close_out()
-    result_tx = client.pending_transaction_info(tx_id)
+    close_out_result = new_ac.close_out()
+    result_tx = cast(
+        dict[str, Any], client.pending_transaction_info(close_out_result.tx_id)
+    )
     expect_dict(
         result_tx,
         {
@@ -387,14 +395,14 @@ def test_close_out(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apan": OnComplete.CloseOutOC,
-                    "apid": app_id,
+                    "apid": ac.app_id,
                     "snd": new_addr,
                 }
             },
         },
     )
 
-    with pytest.raises(LogicException):
+    with pytest.raises(LogicError):
         _, _, newer_signer = sb_accts[2]
         newer_ac = ac.prepare(signer=newer_signer)
         newer_ac.opt_in()
@@ -406,14 +414,16 @@ def test_clear_state(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, app, signer=signer)
-    app_id, _, _ = ac.create()
+    ac.create()
 
     new_addr, new_pk, new_signer = sb_accts[1]
     new_ac = ac.prepare(signer=new_signer)
     new_ac.opt_in()
 
-    tx_id = new_ac.clear_state()
-    result_tx = client.pending_transaction_info(tx_id)
+    clear_state_result = new_ac.clear_state()
+    result_tx = cast(
+        dict[str, Any], client.pending_transaction_info(clear_state_result.tx_id)
+    )
     expect_dict(
         result_tx,
         {
@@ -421,7 +431,7 @@ def test_clear_state(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apan": OnComplete.ClearStateOC,
-                    "apid": app_id,
+                    "apid": ac.app_id,
                     "snd": new_addr,
                 }
             },
@@ -435,7 +445,7 @@ def test_call(sb_accts: SandboxAccounts) -> None:
     client = get_algod_client()
     app_spec = app.build(client)
     ac = ApplicationClient(client, app_spec, signer=signer)
-    app_id, _, _ = ac.create()
+    ac.create()
 
     result = ac.call("add", a=1, b=1)
     assert result.return_value == 2
@@ -454,7 +464,7 @@ def test_call(sb_accts: SandboxAccounts) -> None:
         return_prefix.to_bytes(4, "big") + (2).to_bytes(8, "big")
     ).decode("utf-8")
 
-    result_tx = client.pending_transaction_info(result.tx_id)
+    result_tx = cast(dict[str, Any], client.pending_transaction_info(result.tx_id))
     expect_dict(
         result_tx,
         {
@@ -462,7 +472,7 @@ def test_call(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apaa": [b64encode(arg).decode("utf-8") for arg in raw_args],
-                    "apid": app_id,
+                    "apid": ac.app_id,
                     "snd": addr,
                 }
             },
@@ -478,11 +488,11 @@ def test_add_method_call(sb_accts: SandboxAccounts) -> None:
     client = get_algod_client()
     app_spec = app.build(client)
     ac = ApplicationClient(client, app_spec, signer=signer)
-    app_id, _, _ = ac.create()
+    ac.create()
 
     method_add = app_spec.contract.get_method_by_name("add")
     atc = AtomicTransactionComposer()
-    ac.add_method_call(atc, method_add, a=1, b=1)
+    ac.compose_call(atc, method_add, args={"a": 1, "b": 1})
     atc_result = atc.execute(client, 4)
     result = atc_result.abi_results[0]
 
@@ -498,7 +508,7 @@ def test_add_method_call(sb_accts: SandboxAccounts) -> None:
         return_prefix.to_bytes(4, "big") + (2).to_bytes(8, "big")
     ).decode("utf-8")
 
-    result_tx = client.pending_transaction_info(result.tx_id)
+    result_tx = cast(dict[str, Any], client.pending_transaction_info(result.tx_id))
     expect_dict(
         result_tx,
         {
@@ -506,7 +516,7 @@ def test_add_method_call(sb_accts: SandboxAccounts) -> None:
             "txn": {
                 "txn": {
                     "apaa": [b64encode(arg).decode("utf-8") for arg in raw_args],
-                    "apid": app_id,
+                    "apid": ac.app_id,
                     "snd": addr,
                 }
             },
@@ -529,6 +539,8 @@ def test_fund(sb_accts: SandboxAccounts) -> None:
     assert info["amount"] == fund_amt, "Expected balance to equal fund_amt"
 
 
+# TODO: move these tests to algokit-utils
+"""
 def test_resolve(sb_accts: SandboxAccounts) -> None:
 
     addr, pk, signer = sb_accts[0]
@@ -559,6 +571,7 @@ def test_resolve(sb_accts: SandboxAccounts) -> None:
         ac.resolve({"source": "abi-method", "data": dummy.method_spec().dictify()})
         == "deadbeef"
     )
+"""
 
 
 def test_override_app_create(sb_accts: SandboxAccounts) -> None:
@@ -574,14 +587,14 @@ def test_override_app_create(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     ac = ApplicationClient(client, sc, signer=signer)
-    assert ac.on_create
 
     val = 2
 
-    app_id, _, txid = ac.create(x=val)
+    create_result = ac.create(args={"x": val})
+    app_id = ac.app_id
     assert app_id > 0
 
-    txinfo = client.pending_transaction_info(txid)
+    txinfo = cast(dict[str, Any], client.pending_transaction_info(create_result.tx_id))
     assert txinfo["application-index"] == app_id
 
     retlog = b64decode(txinfo["logs"][0])
@@ -608,16 +621,15 @@ def test_abi_update(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     app_client = ApplicationClient(client, specification, signer=signer)
-    assert app_client.on_update
 
-    app_id, _, _ = app_client.create()
+    app_client.create()
 
     before = app_client.call("get").return_value
 
     assert before == 0
 
     value = 3
-    app_client.update(x=value)
+    app_client.update(args={"x": value})
 
     after = app_client.call("get").return_value
 
@@ -644,16 +656,15 @@ def test_abi_opt_in(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     app_client = ApplicationClient(client, specification, signer=signer)
-    assert app_client.on_opt_in
 
-    app_id, _, _ = app_client.create()
+    app_client.create()
 
     before = app_client.call("get").return_value
 
     assert before == 0
 
     value = 3
-    app_client.opt_in(x=value)
+    app_client.opt_in(args={"x": value})
 
     after = app_client.call("get").return_value
 
@@ -675,12 +686,11 @@ def test_abi_delete(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     app_client = ApplicationClient(client, specification, signer=signer)
-    assert app_client.on_delete
 
     app_client.create()
 
     with pytest.raises(algosdk.error.AlgodHTTPError) as exc_info:
-        app_client.delete(x=do_delete + 1)
+        app_client.delete(args={"x": do_delete + 1})
     assert len(exc_info.value.args) > 0
     exception_message = exc_info.value.args[0]
     assert isinstance(exception_message, str)
@@ -688,7 +698,7 @@ def test_abi_delete(sb_accts: SandboxAccounts) -> None:
         "Unexpected error: " + exception_message
     )
 
-    app_client.delete(x=do_delete)
+    app_client.delete(args={"x": do_delete})
 
 
 def test_abi_close_out(sb_accts: SandboxAccounts) -> None:
@@ -706,13 +716,12 @@ def test_abi_close_out(sb_accts: SandboxAccounts) -> None:
 
     client = get_algod_client()
     app_client = ApplicationClient(client, specification, signer=signer)
-    assert app_client.on_close_out
 
     app_client.create()
     app_client.opt_in()
 
     with pytest.raises(algosdk.error.AlgodHTTPError) as exc_info:
-        app_client.close_out(x=do_close_out + 1)
+        app_client.close_out(args={"x": do_close_out + 1})
     assert len(exc_info.value.args) > 0
     exception_message = exc_info.value.args[0]
     assert isinstance(exception_message, str)
@@ -720,4 +729,4 @@ def test_abi_close_out(sb_accts: SandboxAccounts) -> None:
         "Unexpected error: " + exception_message
     )
 
-    app_client.close_out(x=do_close_out)
+    app_client.close_out(args={"x": do_close_out})

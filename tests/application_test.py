@@ -5,6 +5,7 @@ from pathlib import Path
 import pyteal as pt
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from algokit_utils import ApplicationSpecification, CallConfig
 from pyteal.ast.abi import AssetTransferTransaction, PaymentTransaction
 from typing_extensions import assert_type
 
@@ -19,7 +20,6 @@ from beaker import (
     ReservedLocalStateValue,
     unconditional_create_approval,
 )
-from beaker.application_specification import ApplicationSpecification
 from beaker.lib.storage import BoxList
 
 from tests.conftest import check_application_artifacts_output_stability
@@ -56,11 +56,11 @@ def test_method_config_allow_everything() -> None:
     app = Application("AllowEverything")
 
     actions: MethodConfigDict = {
-        "no_op": pt.CallConfig.ALL,
-        "opt_in": pt.CallConfig.ALL,
-        "close_out": pt.CallConfig.ALL,
-        "update_application": pt.CallConfig.ALL,
-        "delete_application": pt.CallConfig.ALL,
+        "no_op": CallConfig.ALL,
+        "opt_in": CallConfig.ALL,
+        "close_out": CallConfig.ALL,
+        "update_application": CallConfig.ALL,
+        "delete_application": CallConfig.ALL,
     }
 
     @app.external(method_config=actions)

@@ -69,13 +69,15 @@ def main() -> None:
     free_sp.fee = 0
 
     # Add the call to the `check` method to be signed by the populated template logic
-    lsig_client.add_method_call(
+    lsig_client.compose_call(
         atc,
-        sig_checker.check,
+        abi_method=sig_checker.check.method_spec(),
+        args={
+            "signer_address": acct.address,
+            "msg": msg,
+            "sig": sig,
+        },
         suggested_params=free_sp,
-        signer_address=acct.address,
-        msg=msg,
-        sig=sig,
     )
 
     # run it

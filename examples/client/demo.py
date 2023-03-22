@@ -1,5 +1,7 @@
+from algokit_utils import LogicError
+
 from beaker import client, consts, sandbox
-from beaker.client import ApplicationClient, LogicException
+from beaker.client import ApplicationClient
 
 from examples.client import nicknames
 
@@ -13,12 +15,15 @@ def main() -> None:
 
     # Create Application client
     app_client1 = client.ApplicationClient(
-        client=sandbox.get_algod_client(), app=nicknames.app, signer=acct1.signer
+        algod_client=sandbox.get_algod_client(), app=nicknames.app, signer=acct1.signer
     )
 
     # Create the app on-chain (uses signer1)
-    app_id, app_addr, txid = app_client1.create()
-    print(f"Created app with id {app_id} and address {app_addr} in transaction {txid}")
+    create_result = app_client1.create()
+    print(
+        f"Created app with id {app_client1.app_id} and address {app_client1.app_address} "
+        f"in transaction {create_result.tx_id}"
+    )
 
     print(f"Current app state: {app_client1.get_global_state()}")
     # Fund the app account with 1 algo
@@ -36,7 +41,7 @@ def main() -> None:
     # Try calling without opting in
     try:
         app_client2.call(nicknames.set_nick, nick="second")
-    except LogicException as e:
+    except LogicError as e:
         print(f"\n{e}\n")
 
     app_client2.opt_in()
@@ -52,7 +57,7 @@ def main() -> None:
     try:
         app_client2.call(nicknames.set_manager, new_manager=acct2.address)
         print("Shouldn't get here")
-    except LogicException as e:
+    except LogicError as e:
         print("Failed as expected, only addr1 should be authorized to set the manager")
         print(f"\n{e}\n")
 
@@ -67,7 +72,7 @@ def main() -> None:
 
     # Create a new client that just sets the app id we wish to interact with
     app_client3 = ApplicationClient(
-        client=sandbox.get_algod_client(),
+        algod_client=sandbox.get_algod_client(),
         app=nicknames.app,
         signer=acct1.signer,
         app_id=app_client1.app_id,

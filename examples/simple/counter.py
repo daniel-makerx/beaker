@@ -1,3 +1,4 @@
+from algokit_utils import LogicError
 from pyteal import Expr, Int, Seq, TealType, abi
 
 from beaker import (
@@ -6,7 +7,7 @@ from beaker import (
     GlobalStateValue,
     sandbox,
 )
-from beaker.client import ApplicationClient, LogicException
+from beaker.client import ApplicationClient
 
 
 class CounterState:
@@ -46,9 +47,13 @@ def demo() -> None:
     # Create an Application client containing both an algod client and my app
     app_client = ApplicationClient(client, counter_app, signer=acct.signer)
 
-    # Create the applicatiion on chain, set the app id for the app client
-    app_id, app_addr, txid = app_client.create()
-    print(f"Created App with id: {app_id} and address addr: {app_addr} in tx: {txid}")
+    # Create the application on chain, set the app id for the app client
+    create_result = app_client.create()
+    print(
+        f"Created App with id: {app_client.app_id} "
+        f"and address addr: {app_client.app_address} "
+        f"in tx: {create_result.tx_id}"
+    )
 
     app_client.call(increment)
     app_client.call(increment)
@@ -65,7 +70,7 @@ def demo() -> None:
         other_acct = accts.pop()
         other_client = app_client.prepare(signer=other_acct.signer)
         other_client.call(increment)
-    except LogicException as e:
+    except LogicError as e:
         print(e)
         print("App call failed as expected.")
 

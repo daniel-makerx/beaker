@@ -47,12 +47,11 @@ def create_and_opt_in_account(
     )
 
     # Add opt in method call on behalf of lsig
-    app_client.add_method_call(
+    app_client.compose_call(
         atc,
-        disk_hungry.add_account,
+        disk_hungry.add_account.method_spec(),
+        args={"nonce": nonce.encode(), "rekey_to": app_client.app_addr},
         signer=lsig_signer,
-        nonce=nonce.encode(),
-        rekey_to=app_client.app_addr,
         on_complete=txns.OnComplete.OptInOC,
     )
 
@@ -65,7 +64,7 @@ def create_and_opt_in_account(
 def main() -> None:
     # Create app client
     app_client = beaker.client.ApplicationClient(
-        client=beaker.sandbox.get_algod_client(),
+        algod_client=beaker.sandbox.get_algod_client(),
         app=disk_hungry.app,
         signer=beaker.sandbox.get_accounts().pop().signer,
     )

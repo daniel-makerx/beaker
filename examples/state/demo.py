@@ -1,3 +1,5 @@
+from algokit_utils import LogicError
+
 from beaker import client, sandbox
 
 from examples.state import contract
@@ -13,10 +15,10 @@ def main() -> None:
     app_client = client.ApplicationClient(
         algod_client, contract.app, signer=acct.signer
     )
-    app_id, app_address, transaction_id = app_client.create()
+    create_result = app_client.create()
     print(
-        f"DEPLOYED: App ID: {app_id} Address: {app_address} "
-        + f"Transaction ID: {transaction_id}"
+        f"DEPLOYED: App ID: {app_client.app_id} Address: {app_client.app_address} "
+        + f"Transaction ID: {create_result.tx_id}"
     )
 
     app_client.opt_in()
@@ -33,7 +35,7 @@ def main() -> None:
 
     try:
         app_client.call(contract.set_global_state_val, v="Expect fail")
-    except client.LogicException as e:
+    except LogicError as e:
         print(f"Task failed successfully: {e}")
     result = app_client.call(contract.get_global_state_val)
     print(f"Set/get app state result: {result.return_value}")
