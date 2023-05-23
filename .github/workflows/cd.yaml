@@ -61,9 +61,9 @@ jobs:
         run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
 
       - name: Create Continuous Deployment - Beta (non-prod)
-        if: steps.get_branch.outputs.branch == 'master' && !inputs.production_release && github.triggering_actor != 'actions-user'
+        if: |
+            $ {{ steps.get_branch.outputs.branch == 'master' && !inputs.production_release && !contains(github.event.head_commit.message, 'skip-checks: true') }}
         run: |
-          echo Github: ${{ github.triggering_actor  }}
           poetry run semantic-release \
             -v DEBUG \
             --prerelease \
