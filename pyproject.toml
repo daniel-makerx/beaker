@@ -49,7 +49,7 @@ major_on_zero = true
 upload_to_repository = false
 tag_commit = true
 branch = "master"
-commit_message = "{version}\n\nskip-checks: true"
+commit_message = "{version}"
 tag_format = "{version}"
 
 [tool.pytest.ini_options]
