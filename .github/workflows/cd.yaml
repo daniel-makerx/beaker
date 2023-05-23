@@ -64,17 +64,16 @@ jobs:
       - name: Create Continuous Deployment - Beta (non-prod)
         if: steps.get_branch.outputs.branch == 'master' && !inputs.production_release && github.actor != 'github-actions'
         run: |
+          echo Actor: ${{ github.actor  }}
           poetry run semantic-release \
             -v DEBUG \
             --prerelease \
-            --define=upload_to_repository=true \
+            --define=upload_to_repository=false \
             --define=branch=master \
             publish
           gh release edit --prerelease "$(poetry run semantic-release print-version --current)"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY_USERNAME: __token__
-          REPOSITORY_PASSWORD: ${{ secrets.PYPI_API_KEY }}
 
       - name: Create Continuous Deployment - Production
         if: steps.get_branch.outputs.branch == 'master' && inputs.production_release
@@ -83,10 +82,8 @@ jobs:
             -v DEBUG \
             --define=version_source="commit" \
             --define=branch=master \
-            --define=upload_to_repository=true \
+            --define=upload_to_repository=false \
             --define=patch_without_tag=true \
             publish
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
-          REPOSITORY_USERNAME: __token__
-          REPOSITORY_PASSWORD: ${{ secrets.PYPI_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
