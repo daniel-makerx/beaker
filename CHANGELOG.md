@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.2 (2023-05-23)
+
+
 ## v1.0.1 (2023-05-23)
 ### Fix
 * Resolves issue when using ApplicationClient.prepare with a custom TransactionSigner, resolves #213 ([#229](https://github.com/algorand-devrel/beaker/issues/229)) ([`55bd4fc`](https://github.com/algorand-devrel/beaker/commit/55bd4fc2fad4b01d3c64ad71de5bef6d48139cdd))
